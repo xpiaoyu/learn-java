@@ -1,7 +1,5 @@
 # Java
 
----
-
 ### sleep() 和 wait() 及 notify()/notifyAll() 的异同
 
 代码：WaitAndNotify.java
@@ -50,7 +48,7 @@ ThreadLocal **不是为了满足多线程安全**而开发出来的，因为局�
 
 *这其实是错误的。即使用了 TheadLocal ，每一个线程依然需要创建自己的 Connection 而不是直接使用唯一公有 Connection 对象的拷贝。因为使用了拷贝依然存在多线程不安全的问题。*
 
-Thread 类中有一个 threadLocals 成员变量类型是 ThreadLocalMap。这是每个 Thread 都有的，所以数据 Map 并不是在 ThreadLocal 中，而是在每个 Thread 的 ThreadLocalMap 里。
+Thread 类中有一个 threadLocals 成员，变量类型是 ThreadLocalMap。这是每个 Thread 都有的，所以数据 Map 并不是在 ThreadLocal 中，而是在每个 Thread 的 ThreadLocalMap 里。
 
 ThreadLocalMap Key 为 ThreadLocal<?>，值为 Object，根据调用的 ThreadLocal 对象修改对应的 Object 。因此 ThreadLocal 保存对象本质依然是线程内的局部变量。
 
@@ -121,3 +119,29 @@ Heap 主要分为三个部分：
 其中 1, 2 线程间共享，3, 4, 5 线程独有。
 
 ----------
+
+### Spring MyBatis
+
+* 实体类(Entity Class)：对应数据库中的表，类型与字段名按规定转换。
+* 访问接口(DAO Interface)：定义访问数据的方法，与 XML 文件对应。
+* 映射文件(Mapper XML)：提供 SQL 语句，实现访问接口。
+
+----------
+
+### Spring 有关配置文件介绍
+
+* **web.xml (.../WEB-INF/web.xml)**
+
+	* 定义前端控制器(servlet)及映射(servlet-mapping)。
+	* 指明 applicationContext.xml 文件地址。声明 ContextLoaderListener，让其在 Web 容器加载时自动装载 applicationContext 的配置信息。
+	* 各种过滤器(filter)及过滤器映射(filter-mapping)，例如 CharacterEncodingFilter 设置网页编码。
+	* 其他固定页面，如欢迎页(welcome-file-list)、错误页(error-page)。
+
+* **dispatcher-servlet.xml (SpringMVC 配置文件)**
+
+	* 视图解析器(InternalResourceViewResolver)用于检索视图文件，例如 controller 中返回的某个视图逻辑名为 Hello 根据视图解析器中配置的 prefix=/WEB-INF/views/ 和 suffix=.jsp，Spring 会解析 .../WEB-INF/views/Hello.jsp 这个视图。
+	* 自动扫描方式(context:component-scan)扫描指定包下的类寻找含有注解的类，SpringMVC 通常只扫描 controller 包。
+
+----------
+
+### JPA
