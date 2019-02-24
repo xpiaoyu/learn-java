@@ -44,7 +44,7 @@ ThreadLocal **不是为了满足多线程安全**而开发出来的，因为局�
 
 *网上有些文章写道：*
 
-> 用 ThreadLocal\<Connection\>来避免频繁创建 Connection 。
+> 用 ThreadLocal<Connection\>来避免频繁创建 Connection 。
 
 *这其实是错误的。即使用了 TheadLocal ，每一个线程依然需要创建自己的 Connection 而不是直接使用唯一公有 Connection 对象的拷贝。因为使用了拷贝依然存在多线程不安全的问题。*
 
@@ -141,7 +141,31 @@ Heap 主要分为三个部分：
 
 	* 视图解析器(InternalResourceViewResolver)用于检索视图文件，例如 controller 中返回的某个视图逻辑名为 Hello 根据视图解析器中配置的 prefix=/WEB-INF/views/ 和 suffix=.jsp，Spring 会解析 .../WEB-INF/views/Hello.jsp 这个视图。
 	* 自动扫描方式(context:component-scan)扫描指定包下的类寻找含有注解的类，SpringMVC 通常只扫描 controller 包。
+	* 单个 controller 配置，例如：`<bean name="/hello.action" class="com.my.project.controller.HelloController"/>`
+	* 配置处理器映射器及适配器 `<mvc:annotation-driven/>` 相当于注册了 RequestMappingHandlerMapping 和 RequestMappingHandlerAdapter 两个 Bean 用于 controller 请求的分发。
+	* 拦截器(mvc:interceptors)拦截自定义路径的请求，拦截器(Interceptor)继承 HandlerInterceptorAdapter 类或者实现 HandlerInterceptor 接口，一共有三个方法 preHandle, postHandle, afterCompletion。
+		* preHandle 用于预处理请求，返回 true 表示继续流程，返回 false 直接中断流程不会再继续执行其他拦截器或处理器。
+		* postHandle 在处理器后，渲染视图前执行。
+		* afterCompletion 请求处理完毕后执行，只有 preHandle 返回 true 的拦截器，才会执行 afterCompletion 方法。
+	* 全局异常处理器(exceptionResolver)不同于 @ControllerAdvice 注解形式的全局异常处理器，Resolver 通常与视图有关，如果是 Restful 风格 API 建议采用注解形式。
+	* 文件上传解析器(multipartResolver)处理文件上传，设置相关参数。
+	* 静态资源处理(mvc:resources)用于映射静态资源文件，例如：`<mvc:resources mapping="/js/**" location="/js/" />` 也可以使用 `<mvc:default-servlet-handler/>` 表示没有映射到 controller 的请求使用默认设置，即 web.xml 中的配置。
+
+* **applicationContext.xml (Spring 配置文件)**
+
+	* 资源文件配置(context:property-placeholder)引入配置文件，在类对象成员变量上添加注解引入配置的值，例如：`@Value("${jdbc.url}")`。需要注意的是，如果要在 controller 中使用 Value 注解，则必须在 SpringMVC 配置文件中也加入这条语句。
+	* 数据源 Bean 定义例如：`<bean id="dataSource" class="...">...</...>`。有时候数据源会利用注解类形式定义。
+	* sqlSessionFactory Bean 配置 MyBatis。
+	* Mapper 扫描器 Bean(MapperScannerConfigurer)，配合 sqlSessionFactory 使用。
+	* transactionManager Bean 配置数据源的事务控制器。
+	* 事务配置(tx:advice)配置各种方法的事务属性，例如：`<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>`。
+	* 配置 AOP 切面(aop:config)例如：`<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.xx.impl.*.*(..))"/>`。
+	* 定义 service Bean
 
 ----------
 
 ### JPA
+
+
+
+----------
