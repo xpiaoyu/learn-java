@@ -102,6 +102,28 @@ Heap 主要分为三个部分：
 
 5. CMS 过程中。
 
+**几种收集器的实现**
+
+1. 新生代上的GC实现
+
+- Serial：单线程的收集器，只使用一个线程进行收集，并且收集时会暂停其他所有工作线程（Stop the world）。它是Client模式下的默认新生代收集器。
+- ParNew：Serial收集器的多线程版本。在单CPU甚至两个CPU的环境下，由于线程交互的开销，无法保证性能超越Serial收集器。
+- Parallel Scavenge：也是多线程收集器，与ParNew的区别是，它是吞吐量优先收集器。吞吐量=运行用户代码时间/(运行用户代码+垃圾收集时间)。另一点区别是配置-XX:+UseAdaptiveSizePolicy后，虚拟机会自动调整Eden/Survivor等参数来提供用户所需的吞吐量。我们需要配置的就是内存大小-Xmx和吞吐量GCTimeRatio。
+
+2. 老年代上的GC实现
+
+- Serial Old：Serial收集器的老年代版本。
+- Parallel Old：Parallel Scavenge的老年代版本。此前，如果新生代采用PS GC的话，老年代只有Serial Old能与之配合。现在有了Parallel Old与之配合，可以在注重吞吐量及CPU资源敏感的场合使用了。
+- CMS：采用的是标记-清除而非标记-整理，是一款并发低停顿的收集器。但是由于采用标记-清除，内存碎片问题不可避免。可以使用-XX:CMSFullGCsBeforeCompaction设置执行几次CMS回收后，跟着来一次内存碎片整理。
+
+- Serial New收集器是针对新生代的收集器，采用的是复制算法。
+- Parallel New（并行）收集器，新生代采用复制算法，老年代采用标记整理。
+- Parallel Scavenge（并行）收集器，针对新生代，采用复制收集算法。
+- Serial Old（串行）收集器，新生代采用复制，老年代采用标记整理。
+- Parallel Old（并行）收集器，针对老年代，标记整理。
+- CMS收集器，基于标记清理。
+- G1收集器：整体上是基于标记整理 ，局部采用复制。
+
 ----------
 
 ### JVM 内存分布
@@ -160,6 +182,7 @@ Heap 主要分为三个部分：
 	* transactionManager Bean 配置数据源的事务控制器。
 	* 事务配置(tx:advice)配置各种方法的事务属性，例如：`<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>`。
 	* 配置 AOP 切面(aop:config)例如：`<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.xx.impl.*.*(..))"/>`。
+	* 注解方式的事务配置(tx:annotation-driven)，很常见的事务配置方式，Spring Boot 的默认方式。
 	* 定义 service Bean
 
 ----------
