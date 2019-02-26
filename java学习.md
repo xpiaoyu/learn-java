@@ -150,6 +150,18 @@ Heap 主要分为三个部分：
 
 ----------
 
+### Spring Hibernate
+
+Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`，然后定义出 `transactionManager`。
+
+示例：
+
+[Spring Hibernate 注解方式示例](https://blog.csdn.net/m0_37914211/article/details/80977920)
+
+[Spring Hibernate 配置文件方式示例](https://www.cnblogs.com/juaner767/p/5597009.html)
+
+----------
+
 ### Spring 有关配置文件介绍
 
 * **web.xml (.../WEB-INF/web.xml)**
@@ -180,8 +192,8 @@ Heap 主要分为三个部分：
 	* sqlSessionFactory Bean 配置 MyBatis。
 	* Mapper 扫描器 Bean(MapperScannerConfigurer)，配合 sqlSessionFactory 使用。
 	* transactionManager Bean 配置数据源的事务控制器。
-	* 事务配置(tx:advice)配置各种方法的事务属性，例如：`<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>`。
-	* 配置 AOP 切面(aop:config)例如：`<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.xx.impl.*.*(..))"/>`。
+	* 事务配置(`<tx:advice id="txAdvice" transaction-manager="transactionManager">`)配置各种方法的事务属性，例如：`<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>`。
+	* 配置 AOP 切面(aop:config)例如：`<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.xx.impl.*.*(..))"/>` 当然也可以启用注解方式的切面 `<aop:aspectj-autoproxy proxy-target-class="true"/>`。
 	* 注解方式的事务配置(tx:annotation-driven)，很常见的事务配置方式，Spring Boot 的默认方式。
 	* 定义 service Bean
 
@@ -201,22 +213,26 @@ Heap 主要分为三个部分：
 
 **Spring 事务传播**
 
-- PROPAGATION_REQUIRED 如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是 最常见的选择。
+- **PROPAGATION_REQUIRED** 如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是 最常见的选择。
 
-- PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行。
+- **PROPAGATION_REQUIRES_NEW** 新建事务，如果当前存在事务，把当前事务挂起。
 
-- PROPAGATION_MANDATORY 使用当前的事务，如果当前没有事务，就抛出异常。
+- **PROPAGATION_SUPPORTS** 支持当前事务，如果当前没有事务，就以非事务方式执行。
 
-- PROPAGATION_REQUIRES_NEW 新建事务，如果当前存在事务，把当前事务挂起。
+- **PROPAGATION_NOT_SUPPORTED** 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
 
-- PROPAGATION_NOT_SUPPORTED 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+- **PROPAGATION_MANDATORY** 使用当前的事务，如果当前没有事务，就抛出异常。
 
-- PROPAGATION_NEVER 以非事务方式执行，如果当前存在事务，则抛出异常。
+- **PROPAGATION_NEVER** 以非事务方式执行，如果当前存在事务，则抛出异常。
 
-- PROPAGATION_NESTED 	如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与 PROPAGATION_REQUIRED 类似的操作。
+- **PROPAGATION_NESTED** 如果当前存在hh事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION\_REQUIRED 类似的操作。
 
 ----------
 
-### JPA
+### Spring Data JPA
+
+在实体类中，使用 `@Entity` 、 `@Table` 、`@Id`、`@Column` 等注解。
+
+在 Repository 类中，定义接口：`public interface XxRepository extends JpaRepository<T, KeyType>`，其中 T 是表对应的类， KeyType 是表的主键类型。具体的方法名称有相应的规则来进行定义。例如：[Spring Data JPA 简单查询--方法定义规则](https://www.cnblogs.com/rulian/p/6434631.html)
 
 ----------
