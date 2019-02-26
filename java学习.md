@@ -187,8 +187,36 @@ Heap 主要分为三个部分：
 
 ----------
 
+### 事务隔离级别及 Spring 事务传播
+
+**隔离级别**
+
+1. **Read Uncommitted** A 事务未提交的修改，B 事务能够看到。导致 A 回滚后，B 事务读到“脏数据”即**脏读**。
+
+2. **Read Committed**  A 事务提交的修改被 B 看到，B 事务在 A 提交之前和之后读取两次，两次数据不一致，导致**不可重复读**。
+
+3. **Repeatable Read** A 事务插入或删除一条数据并提交，B 事务在 A 前后分别读取一个范围的数据，发现两次结果不一致，导致**幻读**。
+
+4. **Serializable** 串行事务，极少用到，性能很差。
+
+**Spring 事务传播**
+
+- PROPAGATION_REQUIRED 如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是 最常见的选择。
+
+- PROPAGATION_SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行。
+
+- PROPAGATION_MANDATORY 使用当前的事务，如果当前没有事务，就抛出异常。
+
+- PROPAGATION_REQUIRES_NEW 新建事务，如果当前存在事务，把当前事务挂起。
+
+- PROPAGATION_NOT_SUPPORTED 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
+
+- PROPAGATION_NEVER 以非事务方式执行，如果当前存在事务，则抛出异常。
+
+- PROPAGATION_NESTED 	如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与 PROPAGATION_REQUIRED 类似的操作。
+
+----------
+
 ### JPA
-
-
 
 ----------
