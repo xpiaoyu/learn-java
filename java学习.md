@@ -154,6 +154,16 @@ Heap 主要分为三个部分：
 
 Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`，然后定义出 `transactionManager`。
 
+#### Hibernate 对象的三种状态
+
+- 瞬时状态(transient) 对象刚刚创建的状态，不在 session 缓存中，也不予 session 实例关联，数据库中没有对应的记录。*OID 为 null。*
+
+- 持久化状态(persistent) 在 session 缓存中，并与 session 实例关联，在数据库中有对应记录。在清理 session 缓存时，会根据持久化对象的属性变化更新数据库。*session.commit() 和 session.flush() 会清理缓存。*
+
+- 游离状态(detached) 数据库中有记录，session 中没有缓存。*可以用 update() 关联游离对象，使之变为持久化状态，OID 不为 null。*
+
+![](https://i.imgur.com/eapBXFp.jpg)
+
 示例：
 
 [Spring Hibernate 注解方式示例](https://blog.csdn.net/m0_37914211/article/details/80977920)
@@ -162,7 +172,7 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 
 ----------
 
-### Spring 有关配置文件介绍
+### Spring 相关配置文件介绍
 
 * **web.xml (.../WEB-INF/web.xml)**
 
@@ -170,6 +180,8 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 	* 指明 applicationContext.xml 文件地址。声明 ContextLoaderListener，让其在 Web 容器加载时自动装载 applicationContext 的配置信息。
 	* 各种过滤器(filter)及过滤器映射(filter-mapping)，例如 CharacterEncodingFilter 设置网页编码。
 	* 其他固定页面，如欢迎页(welcome-file-list)、错误页(error-page)。
+
+[应用上下文 webApplicationContext](https://www.cnblogs.com/brolanda/p/4265597.html)
 
 * **dispatcher-servlet.xml (SpringMVC 配置文件)**
 
@@ -193,9 +205,10 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 	* Mapper 扫描器 Bean(MapperScannerConfigurer)，配合 sqlSessionFactory 使用。
 	* transactionManager Bean 配置数据源的事务控制器。
 	* 事务配置(`<tx:advice id="txAdvice" transaction-manager="transactionManager">`)配置各种方法的事务属性，例如：`<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>`。
-	* 配置 AOP 切面(aop:config)例如：`<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.xx.impl.*.*(..))"/>` 当然也可以启用注解方式的切面 `<aop:aspectj-autoproxy proxy-target-class="true"/>`。
+	* 配置 AOP 切面(aop:config)例如：`<aop:advisor advice-ref="txAdvice" pointcut="execution(* com.xx.impl.*.*(..))"/>` 当然也可以启用注解方式的切面 `<aop:aspectj-autoproxy proxy-target-class="true"/>`。[AspectJ 切入点表达式](https://blog.csdn.net/lk7688535/article/details/51989746)
 	* 注解方式的事务配置(tx:annotation-driven)，很常见的事务配置方式，Spring Boot 的默认方式。
 	* 定义 service Bean
+	* 引入其他配置文件，例如：`<import resource="classpath:applicationContext-amq.xml" />`。
 
 ----------
 
@@ -226,6 +239,50 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 - **PROPAGATION_NEVER** 以非事务方式执行，如果当前存在事务，则抛出异常。
 
 - **PROPAGATION_NESTED** 如果当前存在hh事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION\_REQUIRED 类似的操作。
+
+----------
+
+### Spring 切面优先级设置
+
+如果一个方法有多个切面对其进行增强，怎么定义切面执行的顺序呢？
+
+答：使用 `@Order(1)` 注解，定义切面的执行顺序。执行顺序为递增。定义事务 order
+`<tx:annotation-driven transaction-manager="txManager"  order="0"/>` 在这个例子中，事务切面会在自定义切面之前运行，如果抛出异常，全部都会回滚。
+
+----------
+
+### Spring 切面对象内部调用不拦截的解决办法
+
+这个问题比较常见也是比较严重，因为 Spring 中的事务也是基于切面的。这个问题会导致事务传播出现异常。
+
+1. 避免内部调用。*这不是个严格意义上的解决办法。*
+
+2. `<aop:aspectj-autoproxy expose-proxy="true" />` 然后将内部调用改为 `((XxService)AopContext.currentProxy()).innertMethod()`。这样，内部调用也会通过代理对象运行，拦截并实现切面功能。*凡是需要拦截的方法必须是 `public` 修饰。*
+
+----------
+
+### Spring Bean 作用域(Scope)及 proxyMode
+
+Spring bean 有四种常见默认作用域：
+
+- 单例（singleton）*整个应用中只有一个对象。*
+- 原型（prototype）*每一次注入和创建时都会新建一个对象。*
+- 会话（session）*每个 session 对应一个对象。*
+- 请求（request）*每个请求对应一个对象。*
+
+还有一种不常见的全局会话（global session）*与 Portlet 应用有关*。
+
+proxyMode 代理模式的用法，举个例子：如果在单例 Bean 中使用 session Bean 那么 session Bean 必须启用代理模式。因为单例 Bean 需要使用多个 session Bean，那么应该用代理类对象而不是实际的对象。
+
+INTERFACE(JDK 代理) 与 TARGET_CLASS(CGLIB) 区别在于 INTERFACE 针对类的接口生成代理，TARGET_CLASS 针对类实现代理 。**这两个方法也是 Spring AOP 采用的两种动态代理方式。**
+
+----------
+
+### Spring BeanFactory 与 FactoryBean
+
+TODO
+
+[Spring BeanFactory与FactoryBean的区别及其各自的详细介绍于用法](https://www.cnblogs.com/redcool/p/6413461.html)
 
 ----------
 
