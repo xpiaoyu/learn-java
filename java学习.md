@@ -129,13 +129,9 @@ Heap 主要分为三个部分：
 ### JVM 内存分布
 
 1. 堆 Heap
-
 2. 方法区 Method Area
-
 3. 虚拟机栈 VM Stack
-
 4. 本地方法栈 Native Method Stack
-
 5. 程序计数器 Program Counter
 
 其中 1, 2 线程间共享，3, 4, 5 线程独有。
@@ -157,17 +153,13 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 #### Hibernate 对象的三种状态
 
 - 瞬时状态(transient) 对象刚刚创建的状态，不在 session 缓存中，也不予 session 实例关联，数据库中没有对应的记录。*OID 为 null。*
-
 - 持久化状态(persistent) 在 session 缓存中，并与 session 实例关联，在数据库中有对应记录。在清理 session 缓存时，会根据持久化对象的属性变化更新数据库。*session.commit() 和 session.flush() 会清理缓存。*
-
 - 游离状态(detached) 数据库中有记录，session 中没有缓存。*可以用 update() 关联游离对象，使之变为持久化状态，OID 不为 null。*
 
 ![](https://i.imgur.com/eapBXFp.jpg)
 
 示例：
-
 [Spring Hibernate 注解方式示例](https://blog.csdn.net/m0_37914211/article/details/80977920)
-
 [Spring Hibernate 配置文件方式示例](https://www.cnblogs.com/juaner767/p/5597009.html)
 
 ----------
@@ -177,7 +169,7 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 * **web.xml (.../WEB-INF/web.xml)**
 
 	* 定义前端控制器(servlet)及映射(servlet-mapping)。
-	* 指明 applicationContext.xml 文件地址。声明 ContextLoaderListener，让其在 Web 容器加载时自动装载 applicationContext 的配置信息。
+	* 指明 applicationContext.xml 文件地址。声明监听器 `<listener>` ContextLoaderListener，让其在 Web 容器加载时自动装载 applicationContext 的配置信息。
 	* 各种过滤器(filter)及过滤器映射(filter-mapping)，例如 CharacterEncodingFilter 设置网页编码。
 	* 其他固定页面，如欢迎页(welcome-file-list)、错误页(error-page)。
 
@@ -212,6 +204,20 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 
 ----------
 
+### Spring ServletContext 加载流程
+
+1. WEB 容器读取 web.xml 配置文件，将 `<context-param>` 节点中以键值对形式保存在 ServletContext 中，然后读取 `<listener>` 节点并创建监听。
+2. 所有的监听器都实现了 `ServletContextListener` 接口，接口中有两个方法 `contextInitialized(ServletContextEvent event)` 和 `contextDestroyed(ServletContextEvent event)` 表示 SelvetContext 生命周期中的启动和终止。监听器通过 `event` 可以获取到之前保存的键值对，然后进行初始化。
+3. 以 Spring 为例，Spring 中的监听器 `ContextLoaderListener` 实现了 `ServletContextListener` 接口，监听器在初始化过程创建 `WebApplicationContext`(WAC)也就是 IoC 容器。WAC 会读取 web.xml 中 `contextConfigLocation` 的值并导入配置，于是 WAC 开始 Bean 的解析、加载、注入等等流程。
+4. `<listener>` 节点加载完毕后会继续加载 `<servlet>` 节点，加载并实例化各个 servlet。并将这些 servlet context 的 parentContext 设置为 WAC。因此，可以在 MVC 上下文中获取到 WAC 的上下文数据。
+
+参考文章：
+[Spring-MVC理解之一：应用上下文webApplicationContext](https://www.cnblogs.com/brolanda/p/4265597.html)
+[Spring 初始化 ContextLoaderListener 与 DispatcherServlet](https://blog.csdn.net/pange1991/article/details/81282823)
+
+
+----------
+
 ### 事务隔离级别及 Spring 事务传播
 
 **隔离级别**
@@ -238,7 +244,7 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 
 - **PROPAGATION_NEVER** 以非事务方式执行，如果当前存在事务，则抛出异常。
 
-- **PROPAGATION_NESTED** 如果当前存在hh事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION\_REQUIRED 类似的操作。
+- **PROPAGATION_NESTED** 如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION\_REQUIRED 类似的操作。
 
 ----------
 
@@ -291,5 +297,22 @@ TODO
 在实体类中，使用 `@Entity` 、 `@Table` 、`@Id`、`@Column` 等注解。
 
 在 Repository 类中，定义接口：`public interface XxRepository extends JpaRepository<T, KeyType>`，其中 T 是表对应的类， KeyType 是表的主键类型。具体的方法名称有相应的规则来进行定义。例如：[Spring Data JPA 简单查询--方法定义规则](https://www.cnblogs.com/rulian/p/6434631.html)
+
+----------
+
+### Spring 依赖注入的三种方式
+
+1. **构造器注入** 能够保证注入的对象一定是正确的；对象创建完毕后立即可以使用；脱离 IoC 框架也能正常使用；如果依赖多，构造函数会很大。
+2. **Field 注入** 短小精悍；脱离 IoC 框架无法使用。
+3. **setter 方法注入** 非常灵活，可以在运行时改变依赖；set 依赖之前对象无法使用。
+
+----------
+
+### 形成死锁的四个必要条件
+
+1. 互斥
+2. 不可剥夺
+3. 请求与保持
+4. 循环等待
 
 ----------
