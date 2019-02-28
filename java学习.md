@@ -115,7 +115,6 @@ Heap 主要分为三个部分：
 - Serial Old：Serial收集器的老年代版本。
 - Parallel Old：Parallel Scavenge的老年代版本。此前，如果新生代采用PS GC的话，老年代只有Serial Old能与之配合。现在有了Parallel Old与之配合，可以在注重吞吐量及CPU资源敏感的场合使用了。
 - CMS：采用的是标记-清除而非标记-整理，是一款并发低停顿的收集器。但是由于采用标记-清除，内存碎片问题不可避免。可以使用-XX:CMSFullGCsBeforeCompaction设置执行几次CMS回收后，跟着来一次内存碎片整理。
-
 - Serial New收集器是针对新生代的收集器，采用的是复制算法。
 - Parallel New（并行）收集器，新生代采用复制算法，老年代采用标记整理。
 - Parallel Scavenge（并行）收集器，针对新生代，采用复制收集算法。
