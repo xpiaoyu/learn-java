@@ -72,15 +72,13 @@ ThreadLocalMap Key 为 ThreadLocal<?>，值为 Object，根据调用的 ThreadLo
  
 ----------
 
-### JVM 堆 (Heap) 组成及 GC 简单过程
+### JVM 内存组成及 GC 简单过程
 
-Heap 主要分为三个部分：
+Heap 主要分为两个部分：
 
 1. 年轻代 (Young Generation)
 
 2. 年老代 (Old Generation)
-
-3. 永久代 (Permanent Generation) *仅仅存在于 HotSpot 中，存储 Class 的信息、常量、静态变量等数据。物理上，永久代在堆中，逻辑上永久代与堆独立。*
 
 **MinorGC 的简单过程**
 
@@ -94,7 +92,7 @@ Heap 主要分为三个部分：
 
 1. 年老代空间不足。*创建大对象、大数组时，会将对象直接放入年老代，可能导致年老代空间不足。*
 
-2. 永久代空间不足。*此种情况较少出现，永久代空间一般设置为默认的 64MB。JDK8 移除了永久代，变成 Metaspace 。*
+2. 永久代空间不足。*仅存在于 HotSpot，此种情况较少出现，永久代空间一般设置为默认的 64MB。JDK8 移除了永久代，变成 Metaspace 。*
 
 3. 年轻代至年老代平均升级大小大于年老代剩余空间。
 
