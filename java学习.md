@@ -211,7 +211,9 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 4. `<listener>` 节点加载完毕后会继续加载 `<servlet>` 节点，加载并实例化各个 servlet。并将这些 servlet context 的 parentContext 设置为 WAC。因此，可以在 MVC 上下文中获取到 WAC 的上下文数据。
 
 参考文章：
+
 [Spring-MVC理解之一：应用上下文webApplicationContext](https://www.cnblogs.com/brolanda/p/4265597.html)
+
 [Spring 初始化 ContextLoaderListener 与 DispatcherServlet](https://blog.csdn.net/pange1991/article/details/81282823)
 
 
@@ -302,7 +304,9 @@ TODO
 ### Spring 依赖注入的三种方式
 
 1. **构造器注入** 能够保证注入的对象一定是正确的；对象创建完毕后立即可以使用；脱离 IoC 框架也能正常使用；如果依赖多，构造函数会很大。
+
 2. **Field 注入** 短小精悍；脱离 IoC 框架无法使用。
+
 3. **setter 方法注入** 非常灵活，可以在运行时改变依赖；set 依赖之前对象无法使用。
 
 ----------
@@ -313,5 +317,60 @@ TODO
 2. 不可剥夺
 3. 请求与保持
 4. 循环等待
+
+----------
+
+### 双亲委派 (parent-delegation model)
+
+**类的唯一性**：在 JVM 中，一个类的唯一性由该类本身和该类的加载器确定。
+
+如果同一个类由不同的加载器加载，结果会产生不同的类。JVM 为了保证同一个类由相同的类加载器加载，引入了双亲委派机制。
+
+**双亲委派的主要流程**：
+
+1. 子类收到类加载请求时，先委托父类加载。
+
+2. 如果没有父类，则在自己加载范围内查找目标类，若找不到目标类就返回子类。
+
+3. 递归上述过程，直到返回初始的类加载器（第一个收到请求者）。
+
+遵守上述流程，加载器只会在自身和父类加载器中寻找目标类，不会去请求自己的子类。
+
+**几个特殊的加载器**：
+
+- 启动类加载器 Bootstrap ClassLoader 顶层加载器，由 C++ 实现，负责加载 `%JRE_HOME%/lib` 和 JVM `-Xbootclasspath` 指定目录中的类。
+
+- 扩展类加载器 Extension ClassLoader 	加载 `%JRE_HOME%/lib/ext` 中的类。
+
+- 应用程序类加载器 Application ClassLoader 负责加载当前应用程序 classpath 下的类。
+
+**破坏双亲委派机制**
+
+使用 `Class.forName(DriverName, false, loader)` 加载类时，调用的是当前类的 ClassLoader。
+
+`Thread.currentThread().getContextClassLoader()` 返回当前应用程序类加载器，实现父类委派子类加载类，破坏了双亲委派机制。
+
+----------
+
+### Spring 框架中 Bean 的生命周期
+
+Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(@PreDestroy)。
+
+[Spring Bean的生命周期（非常详细）](https://www.cnblogs.com/zrtqsk/p/3735273.html)
+
+----------
+
+### Spring 中常用的注解
+
+- `@Autowire` 用于标注需要注入依赖的变量和方法。
+- `@Qualifier` 区分同类型的 Bean，指明 Bean 的名称。
+- `@Component` 一些 Bean 注解的统称，官方不推荐。
+- `@Controller` 控制器，负责处理 DispatcherServlet 分发的请求。
+- `@Service` 通常用于 service 层。
+- `@Repository` 通常用于 DAO 层。
+- `@Scope` 声明 Bean 的作用域，例如 `@Scope(value="session", proxyMode=...)`。
+- `@SessionAttributes` 将 ModelMap 中的属性放入 session 中。
+- `@ModelAttribute` 配合 `@SessionAttributes`  使用。
+- `@PathVariable` 获取路径中的变量。
 
 ----------
