@@ -393,14 +393,37 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 
 **RabbitMQ 四种 Exchange 模式**：
 
-- Fanout Exchange *发送至 Fanout Exchange 的消息会被转发到这个 Exchange 绑定的所有队列(Queue)中。需要注意，每个 Consumer 注册到 Fanout Exchange 时都会新建一个随机名称的队列。*
+- **Fanout Exchange** 发送至 Fanout Exchange 的消息会被转发到这个 Exchange 绑定的所有队列(Queue)中。需要注意，每个 Consumer 注册到 Fanout Exchange 时都会新建一个随机名称的队列。
 
-- Direct Exchange *消息被转发到路由键(Routine Key)指定的队列中，路由键必须完全相同。*
+- **Direct Exchange** 消息被转发到路由键(Routine Key)指定的队列中，路由键必须完全相同。
 
-- Topic Exchange *路由键中含有通配符 `*` 和 `#`，星号表示匹配一个单词，井号表示匹配多个单词，单词之间用点分隔。参考下图：*
+- **Topic Exchange** 路由键中含有通配符 `*` 和 `#`，星号表示匹配一个单词，井号表示匹配多个单词，单词之间用点分隔。参考下图：
 ![](https://i.imgur.com/wIIA2wd.png)
 
-- Header Exchange *消息根据 header 来匹配队列，header 保存了一系列键值对 `<key, value>`，其中有个特殊的 key `x-match`  有两个值 any 与 all。any 表示只要有一个键值对匹配即可，all 表示需要匹配所有的键值对。*
+- **Header Exchange** 消息根据 header 来匹配队列，header 保存了一系列键值对 `<key, value>`，其中有个特殊的 key `x-match`  有两个值 any 与 all。any 表示只要有一个键值对匹配即可，all 表示需要匹配所有的键值对。
+
+**Spring 中使用 RabbitMQ**
+
+1. `rabbit:connection-factory` 定义工厂的 id, host, port, username, password, virtual-host 等等。
+
+2. `rabbit:admin` 这个具体功能不是很清楚，不过与 Exchange 和 Queue 的创建有关。 //TODO
+
+3. `rabbit:queue` 定义一个 Queue。注意，如果是 Fanout 模式并且需要动态订阅，则只能定义 id，不定义 name，因为在 Fanout 模式中，Queue 名称是自动生成的。
+
+4. `rabbit:*-exchange` 这是定义具体的 Exchange，消费者会在 Exchange 中绑定不同的 Queue。
+
+5. `rabbit:listener-container` 监听器容器也就是消费者容器，要指定 connectionFactory。
+
+6. `rabbit:template` 定义生产者，包含 id, connection-factory, exchange, message-converter 等属性。
+
+**注意**：
+1. 按 AMQP 标准，生产者只与 Exchange 通信，而数据会传递到哪一个具体的 Queue 这是 Exchange 的职责。同样地，消费者只与 Queue 通信，消息来自哪个 Exchange 这与自己没有关系。
+2. 根据这个标准， Queue 的定义及 Queue 与 Exchange 的绑定是由消费者来实现，Exchange 的定义由生产者实现。
+3. 如果 Queue 没有显式绑定 Exchange 则绑定默认的名字为空的 Exchange。
+
+相关资料：[RabbitMQ中 exchange、route、queue的关系](https://www.cnblogs.com/linkenpark/p/5393666.html)
+
+----------
 
 ### JNDI JDBC SPI
 
