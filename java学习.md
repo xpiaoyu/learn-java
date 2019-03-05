@@ -72,7 +72,7 @@ ThreadLocalMap Key 为 ThreadLocal<?>，值为 Object，根据调用的 ThreadLo
  
 ----------
 
-### JVM 内存组成及 GC 简单过程
+### JVM 堆组成及 GC 简单过程
 
 Heap 主要分为两个部分：
 
@@ -150,14 +150,20 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 #### Hibernate 对象的三种状态
 
 - 瞬时状态(transient) 对象刚刚创建的状态，不在 session 缓存中，也不予 session 实例关联，数据库中没有对应的记录。*OID 为 null。*
+
 - 持久化状态(persistent) 在 session 缓存中，并与 session 实例关联，在数据库中有对应记录。在清理 session 缓存时，会根据持久化对象的属性变化更新数据库。*session.commit() 和 session.flush() 会清理缓存。*
+
 - 游离状态(detached) 数据库中有记录，session 中没有缓存。*可以用 update() 关联游离对象，使之变为持久化状态，OID 不为 null。*
 
 ![](https://i.imgur.com/eapBXFp.jpg)
 
 示例：
+
 [Spring Hibernate 注解方式示例](https://blog.csdn.net/m0_37914211/article/details/80977920)
+
 [Spring Hibernate 配置文件方式示例](https://www.cnblogs.com/juaner767/p/5597009.html)
+
+[hibernate中对象的3种状态：瞬时态(Transient)、 持久态(Persistent)、脱管态(Detached)](https://www.cnblogs.com/goloving/p/8268311.html)
 
 ----------
 
@@ -214,6 +220,8 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 
 [Spring 初始化 ContextLoaderListener 与 DispatcherServlet](https://blog.csdn.net/pange1991/article/details/81282823)
 
+[SpringMVC加载WebApplicationContext源码分析](https://blessht.iteye.com/blog/2121845)
+
 
 ----------
 
@@ -263,6 +271,12 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 1. 避免内部调用。*这不是个严格意义上的解决办法。*
 
 2. `<aop:aspectj-autoproxy expose-proxy="true" />` 然后将内部调用改为 `((XxService)AopContext.currentProxy()).innertMethod()`。这样，内部调用也会通过代理对象运行，拦截并实现切面功能。*凡是需要拦截的方法必须是 `public` 修饰。*
+
+参考资料：
+
+[spring 的aop proxy 代理](https://www.cnblogs.com/hanxue53/p/5280099.html)
+
+[SpringAOP嵌套调用的解决办法](https://fyting.iteye.com/blog/109236)
 
 ----------
 
@@ -388,5 +402,12 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 
 - Header Exchange *消息根据 header 来匹配队列，header 保存了一系列键值对 `<key, value>`，其中有个特殊的 key `x-match`  有两个值 any 与 all。any 表示只要有一个键值对匹配即可，all 表示需要匹配所有的键值对。*
 
+### JNDI JDBC SPI
+
+- **JNDI(Java Naming and Directory Interface)Java 命名和目录接口** *JNDI 将对象以名称的形式绑定到容器环境(Context)中，在程序中通过 Context 的 lookup 查找名称对应的对象或是节点。每一个 Context 都是一个节点，节点名称和对象名称组成目录。这样的对象就可以通过容器管理而不需要代码来管理。*
+
+- **JDBC(Java DataBase Connectivity)Java 数据库连接** *这个比较好理解，JDBC 定义了一系列数据库操作的标准方法，利用 Java 进行数据库操作时只需要使用 JDBC 定义的标准方法，不需要考虑具体的数据库细节。具体的细节由不同数据的驱动(Driver)来实现，例如：`com.mysql.jdbc.Driver`。*
+
+- **SPI(Service Provider Interface)服务提供者接口** *一种服务发现机制，提供动态的实现更换。很常见、很重要的机制。相关资料：1.[**Java SPI机制简介**](http://www.cnblogs.com/zhongkaiuu/articles/5040971.html) 2.[**【java规范】Java spi机制浅谈**](https://singleant.iteye.com/blog/1497259)*
 
 ----------
