@@ -281,6 +281,8 @@ proxyMode 代理模式的用法，举个例子：如果在单例 Bean 中使用 
 
 INTERFACE(JDK 代理) 与 TARGET_CLASS(CGLIB) 区别在于 INTERFACE 针对类的接口生成代理，TARGET_CLASS 针对类实现代理 。**这两个方法也是 Spring AOP 采用的两种动态代理方式。**
 
+**注意**：如果使用 `session` `request` `global session` 这三种作用域，一定要在 web.xml 引入 RequestContextListener 监听器，否则会报错。这个监听器用于通知 IoC 容器请求进入。
+
 ----------
 
 ### Spring BeanFactory 与 FactoryBean
@@ -370,5 +372,21 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 - `@SessionAttributes` 将 ModelMap 中的属性放入 session 中。
 - `@ModelAttribute` 配合 `@SessionAttributes`  使用。
 - `@PathVariable` 获取路径中的变量。
+
+----------
+
+### RabbitMQ 与 Spring 
+
+**RabbitMQ 四种 Exchange 模式**：
+
+- Fanout Exchange *发送至 Fanout Exchange 的消息会被转发到这个 Exchange 绑定的所有队列(Queue)中。需要注意，每个 Consumer 注册到 Fanout Exchange 时都会新建一个随机名称的队列。*
+
+- Direct Exchange *消息被转发到路由键(Routine Key)指定的队列中，路由键必须完全相同。*
+
+- Topic Exchange *路由键中含有通配符 `*` 和 `#`，星号表示匹配一个单词，井号表示匹配多个单词，单词之间用点分隔。参考下图：*
+![](https://i.imgur.com/wIIA2wd.png)
+
+- Header Exchange *消息根据 header 来匹配队列，header 保存了一系列键值对 `<key, value>`，其中有个特殊的 key `x-match`  有两个值 any 与 all。any 表示只要有一个键值对匹配即可，all 表示需要匹配所有的键值对。*
+
 
 ----------
