@@ -418,10 +418,48 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 
 **注意**：
 1. 按 AMQP 标准，生产者只与 Exchange 通信，而数据会传递到哪一个具体的 Queue 这是 Exchange 的职责。同样地，消费者只与 Queue 通信，消息来自哪个 Exchange 这与自己没有关系。
-2. 根据这个标准， Queue 的定义及 Queue 与 Exchange 的绑定是由消费者来实现，Exchange 的定义由生产者实现。
+
+2. Queue 的定义及 Queue 与 Exchange 的绑定是由消费者或者生产者来实现，Exchange 的定义由生产者实现。
+
 3. 如果 Queue 没有显式绑定 Exchange 则绑定默认的名字为空的 Exchange。
 
-相关资料：[RabbitMQ中 exchange、route、queue的关系](https://www.cnblogs.com/linkenpark/p/5393666.html)
+**持久化**：
+
+- Message 持久化：开启后，未发送的消息会在服务重启后依然存在。必须与 Queue 持久化一起开启才有意义。
+
+- Queue 持久化：关闭后，Queue 会在服务重启后消失。
+
+- Exchange 持久化：关闭后，Exchange 会消失。
+
+	即使全部开启持久化也不能保证消息不丢失，必须关闭消费者 autoACK，当消费者成功处理完后再手动 ACK，这样才能让消息不丢失地传递。
+
+**消息确认机制**：
+
+生产者向 Broker 发送消息时没有反馈，如果消息发送失败，生产者也无法知晓。为了解决这个问题，引入生产者消息确认机制。RabbitMQ 有两种生产者消息确认机制：
+
+1. AMQP 事务 
+
+	基于 AMQP 的协议事务，通过 channel.txSelect(), ch.txCommit(), ch.txRollback() 三个方法来实现。用法与 DB 事务类似。
+
+2. channel 的 Confirm 模式 
+
+	性能较好，消息会被分配一个唯一的 ID，消息被 Broker 接收后，Broker 会向生产者发送确认。Confirm 模式又分为三种方式：
+	1. 普通confirm模式：每发送一条消息后，调用waitForConfirms()方法，等待服务器端confirm。实际上是一种串行confirm了。
+	2. 批量confirm模式：每发送一批消息后，调用waitForConfirms()方法，等待服务器端confirm。一批中有一个失败，则重发这批所有消息。
+	3. 异步confirm模式：提供一个回调方法，服务端confirm了一条或者多条消息后Client端会回调这个方法。
+
+同样地，Broker 把消息发送给消费者后，不知道消息是否被接收、处理。如果消息发送后，消费者重启了，消息就有可能丢失。因此，消费者也有消息确认机制。消费者的确认机制较为简单，通过手动发送 ACK 来反馈消息被正常接收处理。
+
+**分布式事务**：
+//TODO
+
+相关资料：
+
+[RabbitMQ中 exchange、route、queue的关系](https://www.cnblogs.com/linkenpark/p/5393666.html)
+
+[Rabbit之消息持久化](https://blog.csdn.net/u013256816/article/details/60875666)
+
+[RabbitMQ之消息确认机制（事务+Confirm）](https://blog.csdn.net/u013256816/article/details/55515234)
 
 ----------
 
