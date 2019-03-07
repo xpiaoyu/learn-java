@@ -210,7 +210,7 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 ### Spring ServletContext 加载流程
 
 1. WEB 容器读取 web.xml 配置文件，将 `<context-param>` 节点中以键值对形式保存在 ServletContext 中，然后读取 `<listener>` 节点并创建监听。
-2. 所有的监听器都实现了 `ServletContextListener` 接口，接口中有两个方法 `contextInitialized(ServletContextEvent event)` 和 `contextDestroyed(ServletContextEvent event)` 表示 SelvetContext 生命周期中的启动和终止。监听器通过 `event` 可以获取到之前保存的键值对，然后进行初始化。
+2. 监听容器启动和关闭的监听器都实现了 `ServletContextListener` 接口，接口中有两个方法 `contextInitialized(ServletContextEvent event)` 和 `contextDestroyed(ServletContextEvent event)` 表示 SelvetContext 生命周期中的启动和终止。监听器通过 `event` 可以获取到之前保存的键值对，然后进行初始化。
 3. 以 Spring 为例，Spring 中的监听器 `ContextLoaderListener` 实现了 `ServletContextListener` 接口，监听器在初始化过程创建 `WebApplicationContext`(WAC)也就是 IoC 容器。WAC 会读取 web.xml 中 `contextConfigLocation` 的值并导入配置，于是 WAC 开始 Bean 的解析、加载、注入等等流程。
 4. `<listener>` 节点加载完毕后会继续加载 `<servlet>` 节点，加载并实例化各个 servlet。并将这些 servlet context 的 parentContext 设置为 WAC。因此，可以在 MVC 上下文中获取到 WAC 的上下文数据。
 
@@ -295,7 +295,7 @@ proxyMode 代理模式的用法，举个例子：如果在单例 Bean 中使用 
 
 INTERFACE(JDK 代理) 与 TARGET_CLASS(CGLIB) 区别在于 INTERFACE 针对类的接口生成代理，TARGET_CLASS 针对类实现代理 。**这两个方法也是 Spring AOP 采用的两种动态代理方式。**
 
-**注意**：如果使用 `session` `request` `global session` 这三种作用域，一定要在 web.xml 引入 RequestContextListener 监听器，否则会报错。这个监听器用于通知 IoC 容器请求进入。
+**注意**：如果使用 `session`, `request`, `global session` 这三种作用域，一定要在 web.xml 引入 RequestContextListener 监听器，否则会报错。这个监听器用于通知 IoC 容器请求进入。
 
 ----------
 
@@ -451,7 +451,14 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 同样地，Broker 把消息发送给消费者后，不知道消息是否被接收、处理。如果消息发送后，消费者重启了，消息就有可能丢失。因此，消费者也有消息确认机制。消费者的确认机制较为简单，通过手动发送 ACK 来反馈消息被正常接收处理。
 
 **分布式事务**：
-//TODO
+
+分布式事务主要有三种方案： TODO
+
+1. 两阶段提交
+
+2. 最大努力交付
+
+3. 消息最终一致性
 
 相关资料：
 
@@ -460,6 +467,8 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 [Rabbit之消息持久化](https://blog.csdn.net/u013256816/article/details/60875666)
 
 [RabbitMQ之消息确认机制（事务+Confirm）](https://blog.csdn.net/u013256816/article/details/55515234)
+
+[（微服务）分布式事务-最大努力交付 && 消息最终一致性方案](https://segmentfault.com/a/1190000011479826)
 
 ----------
 
