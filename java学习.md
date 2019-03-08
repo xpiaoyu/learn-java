@@ -227,6 +227,13 @@ Bean 定义大致与 MyBatis 类似。由 `dataSource` 定义 `sessionFactory`�
 
 ### 事务隔离级别及 Spring 事务传播
 
+**事务四特性 ACID**
+
+- **A**tomicity 	原子性
+- **C**onsistency 一致性
+- **I**solation 隔离性
+- **D**urability 	持久性
+
 **隔离级别**
 
 1. **Read Uncommitted** A 事务未提交的修改，B 事务能够看到。导致 A 回滚后，B 事务读到“脏数据”即**脏读**。
@@ -450,16 +457,6 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 
 同样地，Broker 把消息发送给消费者后，不知道消息是否被接收、处理。如果消息发送后，消费者重启了，消息就有可能丢失。因此，消费者也有消息确认机制。消费者的确认机制较为简单，通过手动发送 ACK 来反馈消息被正常接收处理。
 
-**分布式事务**：
-
-分布式事务主要有三种方案： TODO
-
-1. 两阶段提交
-
-2. 最大努力交付
-
-3. 消息最终一致性
-
 相关资料：
 
 [RabbitMQ中 exchange、route、queue的关系](https://www.cnblogs.com/linkenpark/p/5393666.html)
@@ -486,8 +483,8 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
  
 多态分为两种：
 
-1. 编译时多态 *重载 Overload，根据参数的静态类型来决定运行的方法。*
-2. **运行时多态** *重写 Override，根据被调用实例的实际类型来决定调用哪个方法。*
+1. 编译时多态 *重载 Overload，根据参数的静态类型和被调用对象的静态类型来决定运行的方法。*
+2. **运行时多态** *重写 Override，根据被调用对象的实际类型来决定调用哪个方法。*
 
 **理解“静态多分派，动态单分派”**
 
@@ -502,3 +499,84 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 相关资料：
 
 [java方法的多态性理解](https://www.cnblogs.com/liujinhong/p/6003144.html)
+
+----------
+
+### 分布式事务及 CAP 定理：
+
+**分布式事务主要有三种方案**： TODO
+
+1. 两阶段提交
+
+2. 最大努力交付
+
+3. 消息最终一致性
+
+**CAP 定理**：
+
+分布式系统的三个指标
+
+- 一致性 Consistency *数据在不同分区是一致的。*
+
+- 可用性 Availability *向分区发送请求，分区必须在规定时间内响应，否则就是不可用。例如分区在分布式事务执行过程中可能会被锁定，导致分区不可用。*
+
+- 分区容错性 Partition tolerance *允许分区之间存在连接或传输数据失败的情况。*
+
+CAP 定理的内容是：三者无法同时满足。
+
+分布式系统必须满足分区容错性，那么就要在一致性和可用性之间作取舍。
+
+相关资料：
+
+[CAP 定理的含义](http://www.ruanyifeng.com/blog/2018/07/cap.html)
+
+**BASE 理论**
+
+TODO
+
+----------
+
+### 面试题相关
+
+亿级数组排序。
+答考察堆排序。
+问redis处理恶意攻击。
+答布隆过滤。
+问jvm相关。
+答这个去看《深入理解Java虚拟机》。
+
+历年阿里面试题汇总（2017年不断更新中） https://blog.csdn.net/sinat_35512245/article/details/60325685
+
+（转载）阿里面试回来，想和Java程序员谈一谈 https://blog.csdn.net/CapsLockWY/article/details/74853311
+
+Java 内存模型，JVM 垃圾收集器， 线程池的类型和使用，多线程之间的同步（例如如何先执行三个线程，完毕后再执行另外一个线程；三个线程如何按顺序执行），乐观锁、悲观锁， CAS， SingleThreadExecutor 和 FixThreadExecutor等于1的时候的区别, 分布式CAP理论，如何判断一个链表有环，观察者模式，命令模式，hashmap、concurrenthashmap的原理，mongo db的介绍、索引，spring boot的介绍、原理，如何监控微服务之间的调用链（spring cloud有哪个开源项目），redis 有哪些数据结构。
+
+1. GC相关的细节问题。
+2. OOM发生的条件和场景。
+3. synchronized，wait，此时线程状态和转换的流程。
+4. singleton实现方法，为什么DCL会失效。
+5. class loader的细节，什么时候需要实现自己的class loader？
+
+----------
+
+### 堆排序
+
+**主要步骤**：
+
+1. 建堆 *将原堆建为大顶堆或者小顶堆。*
+
+2. 交换 *将堆顶元素与无序组最后一个元素交换。*
+
+3. 调整 *从堆顶开始，调整成大顶堆或小顶堆。*
+
+4. 重复步骤 2, 3
+
+----------
+
+### 布隆过滤器
+
+相关资料：
+
+[【原】布隆过滤器 (Bloom Filter) 详解](http://www.cnblogs.com/allensun/archive/2011/02/16/1956532.html)
+
+----------
