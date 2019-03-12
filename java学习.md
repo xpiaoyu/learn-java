@@ -583,15 +583,14 @@ Java 内存模型，JVM 垃圾收集器， 线程池的类型和使用，多线�
 4. singleton实现方法，为什么DCL会失效。
 5. class loader的细节，什么时候需要实现自己的class loader？
 
+SingleThreadExecutor 返回 FinalizableDelegatedExecutorService 实例，这是一个装饰器类，主要功能是只暴露部分成员函数。此外，在 GC 时会执行 ExecutorService.shutdown()。 
 
 	public static ExecutorService newFixedThreadPool(int nThreads) {
-	    return new ThreadPoolExecutor(nThreads, nThreads,
+		return new ThreadPoolExecutor(nThreads, nThreads,
 								      0L, TimeUnit.MILLISECONDS,
 								      new LinkedBlockingQueue<Runnable>());
 	}
-
-SingleThreadExecutor 返回 FinalizableDelegatedExecutorService 实例，这是一个装饰器类，主要功能是只暴露部分成员函数。此外，在 GC 时会执行 ExecutorService.shutdown()。 
-
+	
 	public static ExecutorService newSingleThreadExecutor() {
 	        return new FinalizableDelegatedExecutorService
 	            (new ThreadPoolExecutor(1, 1,
