@@ -583,6 +583,29 @@ Java 内存模型，JVM 垃圾收集器， 线程池的类型和使用，多线�
 4. singleton实现方法，为什么DCL会失效。
 5. class loader的细节，什么时候需要实现自己的class loader？
 
+    public static ExecutorService newFixedThreadPool(int nThreads) {
+	    return new ThreadPoolExecutor(nThreads, nThreads,
+								      0L, TimeUnit.MILLISECONDS,
+								      new LinkedBlockingQueue<Runnable>());
+    }
+
+SingleThreadExecutor 返回 FinalizableDelegatedExecutorService 实例，这是一个装饰器类，主要功能是只暴露部分成员函数。此外，在 GC 时会执行 ExecutorService.shutdown()。 
+
+	public static ExecutorService newSingleThreadExecutor() {
+	        return new FinalizableDelegatedExecutorService
+	            (new ThreadPoolExecutor(1, 1,
+	                                    0L, TimeUnit.MILLISECONDS,
+	                                    new LinkedBlockingQueue<Runnable>()));
+	}
+
+相关资料：
+
+[java&android线程池-Executor框架之ThreadPoolExcutor&ScheduledThreadPoolExecutor浅析（多线程编程之三）](https://blog.csdn.net/javazejian/article/details/50890554)
+
+[Executors的newSingleThreadExecutor()和newFixedThreadPool(1)有什么区别？](https://segmentfault.com/q/1010000011185322/a-1020000011188451)
+
+[关于链表的面试问题（判断一个单链表中是否有环）](https://www.cnblogs.com/ghimtim/p/4882916.html)
+
 ----------
 
 ### 堆排序
@@ -634,6 +657,8 @@ Java 内存模型，JVM 垃圾收集器， 线程池的类型和使用，多线�
 1. **数组大致有序** *通常情况下 pivot 会取第一个元素，遇到数组大致有序时，会变为 f(n) = f(1)+f(n-1) 的情况，解决办法是随机取 pivot 值。*
 
 2. **数组有大量重复值** *这时候随机取值法也没用，依然会退化。因为无论是将等于 privot 的元素分在哪边，都会导致两个数组元素个数差值很大的情况。解决办法是双路或三路快排。*
+
+**注**：双路快排有可能遇到与 pivot 值相等的元素很多的情况，这时候计算机会浪费很多时间在比较和交换相同元素上。引入三路快排能够较好的解决这种情况。
 
 相关资料：
 
