@@ -644,7 +644,7 @@ SingleThreadExecutor 返回 FinalizableDelegatedExecutorService 实例，这是�
 
 ### 快速排序 Quick Sort
 
-**大致流程**：
+**大致流程**
 
 1. partition(A, p, q) 根据 pivot 的值将数组分为两部分 A1[p, i] 与 A2[i+1, q]，使得 A2 中所有元素大于等于(或小于等于) A1 中所有元素。
 
@@ -663,5 +663,107 @@ SingleThreadExecutor 返回 FinalizableDelegatedExecutorService 实例，这是�
 相关资料：
 
 [快速排序 详解（快速排序 双路快排 三路快排）](https://blog.csdn.net/k_koris/article/details/80585979)
+
+----------
+
+### Java 多线程相关
+
+**Lock**
+
+常见有 ReentrantLock。ReentrantLock 比 Synchronized 更加强大
+
+1. 可以设置为公平锁，避免饥饿。
+
+2. 有 tryLock() 方法，获取锁超时。
+
+3. 有 newCondition() 方法获取多个等待队列，通过 Condition 的 await() 和 signal()/signalAll() 来等待和唤醒线程。
+
+4.  lockInterruptibly() 可中断锁等待，避免线程无限等待。
+
+**BlockingQueue**
+
+主要由三组方法：
+
+1. add()/remove() 如果队列满或者空，会抛出异常 IllegalStateException。
+
+2. offer()/poll() 如果队列满，返回 false；如果队列空，返回 null。这组方法可以设置超时时间。
+
+3. put()/take() 如果队列满或者空，会阻塞。
+
+第 2 与第 3 组需要捕获 Checked Exception: InterruptedException。 
+
+**ExecutorService**
+
+Java 线程池，由于 new Thread(...).start() 方式的进程创建代价昂贵，因此实际使用中，都会采用线程池的方式来管理线程。
+
+**参数解析**
+
+	public ThreadPoolExecutor(int corePoolSize,
+		int maximumPoolSize,
+		long keepAliveTime,
+		TimeUnit unit,
+		BlockingQueue<Runnable> workQueue,
+		ThreadFactory threadFactory,
+		RejectedExecutionHandler handler)
+
+- corePoolSize : 核心线程数，一旦创建将不会再释放。如果创建的线程数还没有达到指定的核心线程数量，将会继续创建新的核心线程，直到达到最大核心线程数后，核心线程数将不在增加；如果没有空闲的核心线程，同时又未达到最大线程数，则将继续创建非核心线程；如果核心线程数等于最大线程数，则当核心线程都处于激活状态时，任务将被挂起，等待空闲线程来执行。
+
+- maximumPoolSize : 最大线程数，允许创建的最大线程数量。如果最大线程数等于核心线程数，则无法创建非核心线程；如果非核心线程处于空闲时，超过设置的空闲时间，则将被回收，释放占用的资源。
+
+- keepAliveTime : 也就是当线程空闲时，所允许保存的最大时间，超过这个时间，线程将被释放销毁，但只针对于非核心线程。
+
+- unit : 时间单位，TimeUnit.SECONDS等。
+
+- workQueue : 任务队列，存储暂时无法执行的任务，等待空闲线程来执行任务。
+
+- threadFactory :  线程工程，用于创建线程。
+
+- handler : 当线程边界和队列容量已经达到最大时，用于处理阻塞时的程序
+
+**四种常见线程池类型**
+
+- 单线程池 SingleThreadExecutor
+
+	FinalizableDelegatedExecutorService 是一个装饰器类，隐藏了 ThreadPoolExecutor 的部分方法，并且会在 GC 时自动调用 executor.shutdown()。
+
+		public static ExecutorService newSingleThreadExecutor() {
+			return new FinalizableDelegatedExecutorService
+				(new ThreadPoolExecutor(1, 1,
+				0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>()));
+		}
+
+- 固定线程池 FixedThreadPool
+
+	FixedThreadPool(1) 与 SingleThreadExecutor 的参数定义完全一致，区别在于没有装饰器类。
+
+		public static ExecutorService newFixedThreadPool(int nThreads) {
+			return new ThreadPoolExecutor(nThreads, nThreads,
+			  0L, TimeUnit.MILLISECONDS,
+			  new LinkedBlockingQueue<Runnable>());
+		}
+
+- 缓存线程池
+
+	适合生命周期短的任务。
+
+		public static ExecutorService newCachedThreadPool() {
+		        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+		                                      60L, TimeUnit.SECONDS,
+		                                      new SynchronousQueue<Runnable>());
+		 }
+
+- 延时线程池
+
+	循环执行任务。有两个特殊的方法 scheduleAtFixedRate() 与 scheduleWithFixedDelay()。前者表示相邻两次启动方法的时间点差值固定，也就是不把执行时间计算进去。后者指在上个任务执行完毕后，延迟指定的时间。**需要注意**：即使任务执行时间超过间隔时间，scheduleAtFixedRate() 也不会创建新线程去执行，而是等待上个任务结束完毕后，立即开始下个任务。
+
+		public ScheduledThreadPoolExecutor(int corePoolSize) {
+		        super(corePoolSize, Integer.MAX_VALUE, 0, TimeUnit.NANOSECONDS,
+		              new DelayedWorkQueue());
+		}
+
+相关资料：
+
+[threadPoolExecutor 中的 shutdown() 、 shutdownNow() 、 awaitTermination() 的用法和区别](https://blog.csdn.net/u012168222/article/details/52790400)
 
 ----------

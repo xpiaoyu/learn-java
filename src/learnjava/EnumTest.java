@@ -8,6 +8,8 @@ public class EnumTest {
     enum MyInstance {
         Instance;
 
+        private String s = "This is a singleton Instance created by Enum.";
+
         MyInstance() {
             try {
                 Thread.sleep(1000);
@@ -18,14 +20,15 @@ public class EnumTest {
         }
 
         public void log(String s) {
-            System.out.println(s);
+            System.out.println(s + " " + this.s);
         }
     }
 
     public static void main(String[] args) {
+        MyInstance instance;
         System.out.println("1 " + System.currentTimeMillis());
 
-        MyInstance instance = MyInstance.Instance;
+        instance = MyInstance.Instance;
         System.out.println("2 " + System.currentTimeMillis());
 
         MyInstance instance1 = MyInstance.Instance;
