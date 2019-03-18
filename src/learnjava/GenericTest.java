@@ -11,7 +11,7 @@ public class GenericTest {
     }
 
     public static void main(String[] args) {
-        List<?>[] lsa = new List<?>[10]; // Not really allowed.
+        List<String>[] lsa = new ArrayList[10]; // Not really allowed.
         Object o = lsa;
         Object[] oa = (Object[]) o;
         List<Integer> li = new ArrayList<Integer>();

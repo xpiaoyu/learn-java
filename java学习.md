@@ -369,6 +369,19 @@ Java 线程池，由于 new Thread(...).start() 方式的进程创建代价昂�
 
 - `asSubclass(A.class)` 将 Class<?> 转化为 Class<? extends A>
 
+**获取对象私有属性与执行对象私有方法**
+
+获取对象私有属性值，如果是获取类静态属性，instance 就是 Class 对象。
+
+    field.setAccessible(true);
+    Object obj = field.get(instance);
+
+执行对象私有方法，如果是执行类方法，instance 为 `null`，如果没有参数 args 为 `null`。
+
+    method.setAccessible(true);
+    Object[] args = new Object[]{"params", 1};
+    Object obj = method.invoke(instance, args);
+
 ----------
 
 ### Java 泛型
