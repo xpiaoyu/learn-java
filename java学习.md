@@ -64,11 +64,11 @@ ThreadLocalMap Key 为 ThreadLocal<?>，值为 Object，根据调用的 ThreadLo
 
 `-Xmn5120m` 年轻代大小 *Young Gen = Eden + 2\*Survivor*
 
-`-XXSurvivorRatio=3` 表示 Eden 与一个 Survivor 的比值 *Eden = 3\*Survivor*
+`-XXSurvivorRatio=3` 表示 Eden 与一个 Survivor 的比值 Eden = 3*Survivor
 
 `-XX:PermSize=64m` 持久代大小
 
-`-XX:NewRatio=4` 年轻代与年老代比值 *Old Gen = 4\*Young Gen*
+`-XX:NewRatio=4` 年轻代与年老代比值 Old Gen = 4*Young Gen
  
 ----------
 
@@ -174,6 +174,8 @@ Heap 主要分为两个部分：
 
 `Thread.currentThread().getContextClassLoader()` 返回当前应用程序类加载器，实现父类委派子类加载类，破坏了双亲委派机制。
 
+**面试题**：什么时候需要自己定义 ClassLoader？
+
 ----------
 
 ### JNDI JDBC SPI
@@ -182,7 +184,7 @@ Heap 主要分为两个部分：
 
 - **JDBC(Java DataBase Connectivity)Java 数据库连接** *这个比较好理解，JDBC 定义了一系列数据库操作的标准方法，利用 Java 进行数据库操作时只需要使用 JDBC 定义的标准方法，不需要考虑具体的数据库细节。具体的细节由不同数据的驱动(Driver)来实现，例如：`com.mysql.jdbc.Driver`。*
 
-- **SPI(Service Provider Interface)服务提供者接口** *一种服务发现机制，提供动态的实现更换。很常见、很重要的机制。相关资料：1.[**Java SPI机制简介**](http://www.cnblogs.com/zhongkaiuu/articles/5040971.html) 2.[**【java规范】Java spi机制浅谈**](https://singleant.iteye.com/blog/1497259)*
+- **SPI(Service Provider Interface)服务提供者接口** *一种服务发现机制，提供动态的实现更换。很常见、很重要的机制。通过 `ServiceLoader.load(Interface.class)` 加载。相关资料：1.[**Java SPI机制简介**](http://www.cnblogs.com/zhongkaiuu/articles/5040971.html) 2.[**【java规范】Java spi机制浅谈**](https://singleant.iteye.com/blog/1497259)*
 
 ----------
 
@@ -330,6 +332,11 @@ Java 线程池，由于 new Thread(...).start() 方式的进程创建代价昂�
 
 ### Java 克隆(clone)
 
+1. 重写 clone 方法一定要实现 Cloneable 接口。
+
+2. super.clone() 方法要捕获 checked exception: CloneNotSupportedException。
+
+3. 默认是浅拷贝，深拷贝需要手动编写。
 
 ----------
 
