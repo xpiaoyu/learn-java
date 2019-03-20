@@ -398,3 +398,31 @@ Java 线程池，由于 new Thread(...).start() 方式的进程创建代价昂�
 [java 泛型详解-绝对是对泛型方法讲解最详细的，没有之一](https://www.cnblogs.com/coprince/p/8603492.html)
 
 ----------
+
+### Java BIO NIO AIO
+
+BIO: Blocking IO 阻塞 IO
+
+NIO: Non-blocking IO 非阻塞 IO
+
+AIO: Asynchronous IO 异步 IO
+
+注意：阻塞与非阻塞是同步 IO 中的方式，异步 IO 没有阻塞与非阻塞之说。
+
+**区别**
+
+1. 阻塞与非阻塞：阻塞 IO 会在请求 IO 操作后，暂停线程的运行，直到数据就绪。非阻塞 IO 在向内核发起 IO 操作请求后，线程继续运行，直至查询到数据就绪，线程再进 IO 读写。
+
+2. 同步与异步：同步 IO 需要由线程主动读写数据，异步 IO 的数据读写由内核完成。因此 select, epoll, java selector 等多路复用技术，依然属于同步 IO。原因在于数据读写操作还是由用户线程完成。
+
+> IO分两阶段：
+> 1. 数据准备阶段
+> 2. 内核空间复制回用户进程缓冲区阶段
+> 
+> 一般来讲：阻塞IO模型、非阻塞IO模型、IO复用模型(select/poll/epoll)、信号驱动IO模型都属于同步IO，因为阶段2是阻塞的(尽管时间很短)。只有异步IO模型是符合POSIX异步IO操作含义的，不管在阶段1还是阶段2都可以干别的事。
+
+相关资料：
+
+[关于同步、异步与阻塞、非阻塞的理解](https://www.cnblogs.com/Anker/p/5965654.html)
+
+----------

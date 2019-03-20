@@ -292,3 +292,9 @@ Bean 自身主要有两个方法 init-method(@PostConstruct) 和 destroy-method(
 [（微服务）分布式事务-最大努力交付 && 消息最终一致性方案](https://segmentfault.com/a/1190000011479826)
 
 ----------
+
+### Spring 循环依赖
+
+TODO
+
+----------
