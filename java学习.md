@@ -393,6 +393,26 @@ Java 线程池，由于 new Thread(...).start() 方式的进程创建代价昂�
 
 ### Java 泛型
 
+注意：
+
+1. 非静态内部类默认使用外部类泛型，也可以定义自己的泛型。静态内部类无法使用外部类型。
+
+2. 没有泛型数组，因为泛型在运行时被擦除，因此可以将任意同类泛型放入泛型数组中且没有错误，而在取出数组成员并取值时出现 `ClassCastException`。
+
+泛型示例：
+
+**定义泛型类及方法**
+
+    class Genertic<T extends Number> { // 定义限定范围的类泛型
+        void useClassGeneric(T param) {} // 使用类的泛型
+        public <T> void useNewGeneric(T param) {} // 使用新泛型，与类泛型同名
+        public <T extends CharSequence> void newGen(T param) {} // 泛型的限定范围
+    }
+
+**PECS 原则**
+
+Producer Extends Consumer Super 生产者用 <? extends T>，消费者用 <? super T>。
+
 相关资料：
 
 [java 泛型详解-绝对是对泛型方法讲解最详细的，没有之一](https://www.cnblogs.com/coprince/p/8603492.html)
